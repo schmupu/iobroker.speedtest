@@ -1,0 +1,97 @@
+{
+	"common": {
+		"name": "speedtest",
+		"version": "0.0.1",
+		"news": {
+			"0.0.1": {
+				"en": "initial release",
+				"de": "Erstveröffentlichung",
+				"ru": "Начальная версия",
+				"pt": "lançamento inicial",
+				"nl": "Eerste uitgave",
+				"fr": "Première version",
+				"it": "Versione iniziale",
+				"es": "Versión inicial",
+				"pl": "Pierwsze wydanie",
+				"zh-cn": "首次出版"
+			}
+		},
+		"title": "Internet Speedtest",
+		"titleLang": {
+			"en": "Internet Speedtest",
+			"de": "Internet Speedtest",
+			"ru": "Интернет Speedtest",
+			"pt": "Internet Speedtest",
+			"nl": "Internetsnelheidstest",
+			"fr": "Test de vitesse Internet",
+			"it": "Internet Speedtest",
+			"es": "Prueba de velocidad de Internet",
+			"pl": "Internet Speedtest",
+			"zh-cn": "互联网速度测试"
+		},
+		"desc": {
+			"en": "Checks the internet speed",
+			"de": "Überprüft die Internetgeschwindigkeit",
+			"ru": "Проверяет скорость интернета",
+			"pt": "Verifica a velocidade da internet",
+			"nl": "Controleert de internetsnelheid",
+			"fr": "Checks the internet speed",
+			"it": "Controlla la velocità di Internet",
+			"es": "Comprueba la velocidad de Internet",
+			"pl": "Sprawdza prędkość internetu",
+			"zh-cn": "检查网速"
+		},
+		"authors": [
+			"Thorsten Stueben <thorsten@stueben.de>"
+		],
+		"keywords": [
+			"speed internet"
+		],
+		"license": "MIT",
+		"platform": "Javascript/Node.js",
+		"main": "main.js",
+		"icon": "speedtest.png",
+		"enabled": true,
+		"extIcon": "https://raw.githubusercontent.com/schmupu/ioBroker.speedtest/master/admin/speedtest.png",
+		"readme": "https://github.com/schmupu/ioBroker.speedtest/blob/master/README.md",
+		"loglevel": "info",
+		"mode": "daemon",
+		"type": "network",
+		"compact": true,
+		"connectionType": "cloud",
+		"dataSource": "poll",
+		"materialize": true,
+		"dependencies": [
+			{
+				"js-controller": ">=2.0.0"
+			}
+		]
+	},
+	"native": {
+		"polltime":  15
+	},
+	"objects": [],
+	"instanceObjects": [
+		{
+			"_id": "info",
+			"type": "channel",
+			"common": {
+				"name": "Information"
+			},
+			"native": {}
+		},
+		{
+			"_id": "info.connection",
+			"type": "state",
+			"common": {
+				"role": "indicator.connected",
+				"name": "Device or service connected",
+				"type": "boolean",
+				"read": true,
+				"write": false,
+				"def": false
+			},
+			"native": {}
+		}
+	]
+}
