@@ -39,7 +39,7 @@
     "sinon": "^9.2.2",
     "sinon-chai": "^3.5.0",
     "typescript": "^4.1.3"
-  }, 
+  },
   "main": "main.js",
   "scripts": {
     "test:js": "mocha --timeout 45000 --config test/mocharc.custom.json \"{!(node_modules|test)/**/*.test.js,*.test.js,test/**/test!(PackageFiles|Startup).js}\"",
