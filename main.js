@@ -3,7 +3,7 @@
 /*
  * Created with @iobroker/create-adapter v1.30.1
  */
-
+ 
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 const utils = require('@iobroker/adapter-core');
