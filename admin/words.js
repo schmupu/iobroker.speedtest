@@ -25,5 +25,17 @@ systemDictionary = {
 		"es": "Polltime en minutos",
 		"pl": "Czas odpytywania w minutach",
 		"zh-cn": "分钟轮询时间"
+	},
+	"Accept the Ookla and GDPR license terms of speedtest.net": {
+		"en": "Accept the Ookla and GDPR license terms of speedtest.net",
+		"de": "Akzeptieren Sie die Ookla- und GDPR-Lizenzbedingungen von speedtest.net",
+		"ru": "Примите условия лицензии Ookla и GDPR от speedtest.net",
+		"pt": "Aceite os termos de licença Ookla e GDPR de speedtest.net",
+		"nl": "Accepteer de Ookla- en AVG-licentievoorwaarden van speedtest.net",
+		"fr": "Acceptez les termes de licence Ookla et GDPR de speedtest.net",
+		"it": "Accetta i termini di licenza Ookla e GDPR di speedtest.net",
+		"es": "Acepte los términos de licencia de Ookla y GDPR de speedtest.net",
+		"pl": "Zaakceptuj warunki licencji Ookla i RODO speedtest.net",
+		"zh-cn": "接受speedtest.net的Ookla和GDPR许可条款"
 	}
 };

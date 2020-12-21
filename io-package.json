@@ -68,7 +68,8 @@
 		]
 	},
 	"native": {
-		"polltime":  15
+		"polltime":  15,
+		"license": false
 	},
 	"objects": [],
 	"instanceObjects": [
