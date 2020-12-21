@@ -212,6 +212,7 @@ class Speedtest extends utils.Adapter {
       checkRunning = true;
       this.log.debug('Starting internet speed check');
       let speed = await speedTest({
+        sourceIp: this.config.sourceip || undefined,
         acceptLicense: this.config.license,
         acceptGdpr: this.config.license,
         maxTime: 20000
