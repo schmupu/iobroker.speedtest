@@ -7,7 +7,8 @@
 const utils = require('@iobroker/adapter-core');
 const speedTest = require('speedtest-net');
 
-let timerPoll = undefined;
+let intervallHandle = undefined;
+let timeoutHandle = undefined;
 let checkRunning = false;
 
 class Speedtest extends utils.Adapter {
@@ -81,7 +82,7 @@ class Speedtest extends utils.Adapter {
       },
       native: {},
     });
-    await this.setObjectNotExistsAsync('speedcheck', {
+    await this.setObjectNotExistsAsync('speed.speedcheck', {
       type: 'state',
       common: {
         name: 'Run speed test',
@@ -145,7 +146,8 @@ class Speedtest extends utils.Adapter {
   onUnload(callback) {
     try {
       // Here you must clear all timeouts or intervals that may still be active
-      clearTimeout(timerPoll);
+      clearTimeout(timeoutHandle);
+      clearInterval(intervallHandle);
       callback();
     } catch (e) {
       callback();
@@ -177,7 +179,7 @@ class Speedtest extends utils.Adapter {
       let deviceId = id.replace(this.namespace + '.', '');
       // The state was changed
       // this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-      if (!checkRunning && deviceId === 'speedcheck') {
+      if (deviceId === 'speed.speedcheck') {
         this.log.debug('Starting manuell internet speed check');
         setTimeout(async () => await this.speed());
       }
@@ -204,40 +206,43 @@ class Speedtest extends utils.Adapter {
    * 
    */
   async speed() {
-    if(!this.config.license) {
+    if (!this.config.license) {
       this.log.warn('Please accept the Ookla and GDPR license terms of speedtest.net!');
       return undefined;
     }
-    try {
-      checkRunning = true;
-      this.log.debug('Starting internet speed check');
-      let speed = await speedTest({
-        sourceIp: this.config.sourceip || undefined,
-        acceptLicense: this.config.license,
-        acceptGdpr: this.config.license,
-        maxTime: 20000
-      });
-      let download = (speed.download.bytes / speed.download.elapsed / 1024) * 8;
-      let upload = (speed.upload.bytes / speed.upload.elapsed / 1024) * 8;
-      let ping = speed.ping.latency;
-      download = Math.round(download * 100) / 100;
-      upload = Math.round(upload * 100) / 100;
-      ping = Math.round(ping);
-      this.log.debug('Downlaod: ' + download + ' Mbit/s');
-      this.log.debug('Upload:  ' + upload + ' Mbit/s');
-      this.log.debug('Ping:  ' + ping + ' ms');
-      await this.setStateAsync('speed.download', { val: download, ack: true });
-      await this.setStateAsync('speed.upload', { val: upload, ack: true });
-      await this.setStateAsync('speed.ping', { val: ping, ack: true });
-      await this.setStateAsync('info.internalip', { val: speed.interface.internalIp, ack: true });
-      await this.setStateAsync('info.externalip', { val: speed.interface.externalIp, ack: true });
-      checkRunning = false;
-      return { 'download': download, 'upload': upload, 'ping': ping };
-    } catch (error) {
-      this.log.error('Could not check the internet speed. ' + error);
-      checkRunning = false;
-      return undefined;
-    }
+    clearTimeout(timeoutHandle);
+    timeoutHandle = setTimeout(async () => {
+      try {
+        checkRunning = true;
+        this.log.debug('Starting internet speed check');
+        let speed = await speedTest({
+          sourceIp: this.config.sourceip || undefined,
+          acceptLicense: this.config.license,
+          acceptGdpr: this.config.license,
+          maxTime: 20000
+        });
+        let download = (speed.download.bytes / speed.download.elapsed / 1024) * 8;
+        let upload = (speed.upload.bytes / speed.upload.elapsed / 1024) * 8;
+        let ping = speed.ping.latency;
+        download = Math.round(download * 100) / 100;
+        upload = Math.round(upload * 100) / 100;
+        ping = Math.round(ping);
+        this.log.debug('Downlaod: ' + download + ' Mbit/s');
+        this.log.debug('Upload:  ' + upload + ' Mbit/s');
+        this.log.debug('Ping:  ' + ping + ' ms');
+        await this.setStateAsync('speed.download', { val: download, ack: true });
+        await this.setStateAsync('speed.upload', { val: upload, ack: true });
+        await this.setStateAsync('speed.ping', { val: ping, ack: true });
+        await this.setStateAsync('info.internalip', { val: speed.interface.internalIp, ack: true });
+        await this.setStateAsync('info.externalip', { val: speed.interface.externalIp, ack: true });
+        checkRunning = false;
+        return { 'download': download, 'upload': upload, 'ping': ping };
+      } catch (error) {
+        this.log.error(error);
+        checkRunning = false;
+        return undefined;
+      }
+    });
   }
 
   /**
@@ -247,9 +252,12 @@ class Speedtest extends utils.Adapter {
   async start(min) {
     try {
       await this.speed();
+      intervallHandle = setInterval(async () => {
+        await this.speed();
+      }, min * 60 * 1000);
     } catch (error) {
+      this.log.error(error);
     }
-    timerPoll = setTimeout(async () => { await this.start(min); }, min * 60 * 1000);
   }
 }
 
