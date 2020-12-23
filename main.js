@@ -82,7 +82,96 @@ class Speedtest extends utils.Adapter {
       },
       native: {},
     });
+    await this.setObjectNotExistsAsync('speed.progress', {
+      type: 'state',
+      common: {
+        name: 'progress',
+        role: 'info.status',
+        type: 'number',
+        desc: 'Progress',
+        def: 0,
+        read: true,
+        write: false,
+        unit: '%',
+      },
+      native: {},
+    });
     await this.setObjectNotExistsAsync('speed.speedcheck', {
+      type: 'state',
+      common: {
+        name: 'Run speed test',
+        type: 'boolean',
+        read: true,
+        role: 'button',
+        write: true,
+        def: false
+      },
+      native: {},
+    });
+    await this.setObjectNotExistsAsync('progress', {
+      type: 'channel',
+      common: {
+        name: 'speed'
+      },
+      native: {},
+    });
+    await this.setObjectNotExistsAsync('progress.download', {
+      type: 'state',
+      common: {
+        name: 'download',
+        role: 'info.status',
+        type: 'number',
+        desc: 'Download speed',
+        def: 0,
+        read: true,
+        write: false,
+        unit: 'Mbit/s',
+      },
+      native: {},
+    });
+    await this.setObjectNotExistsAsync('progress.upload', {
+      type: 'state',
+      common: {
+        name: 'upload',
+        role: 'info.status',
+        type: 'number',
+        desc: 'Upload speed',
+        def: 0,
+        read: true,
+        write: false,
+        unit: 'Mbit/s',
+      },
+      native: {},
+    });
+    await this.setObjectNotExistsAsync('progress.ping', {
+      type: 'state',
+      common: {
+        name: 'ping',
+        role: 'info.status',
+        type: 'number',
+        desc: 'Ping Latency',
+        def: 0,
+        read: true,
+        write: false,
+        unit: 'ms',
+      },
+      native: {},
+    });
+    await this.setObjectNotExistsAsync('progress.progress', {
+      type: 'state',
+      common: {
+        name: 'progress',
+        role: 'info.status',
+        type: 'number',
+        desc: 'Progress',
+        def: 0,
+        read: true,
+        write: false,
+        unit: '%',
+      },
+      native: {},
+    });
+    await this.setObjectNotExistsAsync('progress.speedcheck', {
       type: 'state',
       common: {
         name: 'Run speed test',
@@ -179,7 +268,7 @@ class Speedtest extends utils.Adapter {
       let deviceId = id.replace(this.namespace + '.', '');
       // The state was changed
       // this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-      if (deviceId === 'speed.speedcheck') {
+      if (deviceId === 'speed.speedcheck' || deviceId === 'progress.speedcheck') {
         this.log.debug('Starting manuell internet speed check');
         setTimeout(async () => await this.speed());
       }
@@ -213,13 +302,15 @@ class Speedtest extends utils.Adapter {
     clearTimeout(timeoutHandle);
     timeoutHandle = setTimeout(async () => {
       try {
+        const self = this;
         checkRunning = true;
         this.log.debug('Starting internet speed check');
         let speed = await speedTest({
           sourceIp: this.config.sourceip || undefined,
           acceptLicense: this.config.license,
           acceptGdpr: this.config.license,
-          maxTime: 20000
+          maxTime: 20000,
+          progress: async (handle) => await this.progress(self, handle)
         });
         let download = (speed.download.bytes / speed.download.elapsed / 1024) * 8;
         let upload = (speed.upload.bytes / speed.upload.elapsed / 1024) * 8;
@@ -247,6 +338,33 @@ class Speedtest extends utils.Adapter {
 
   /**
    * 
+   * @param {*} self 
+   * @param {*} speed
+   */
+  async progress(self, speed) {
+    let p = speed.progress;
+    p = Math.round(p * 100 * 100) / 100;
+    await self.setStateChangedAsync('progress.progress', { val: p, ack: true });
+    await self.setStateChangedAsync('speed.progress', { val: p, ack: true });
+    if (speed.download) {
+      let download = (speed.download.bytes / speed.download.elapsed / 1024) * 8;
+      download = Math.round(download * 100) / 100;
+      await self.setStateChangedAsync('progress.download', { val: download, ack: true });
+    }
+    if (speed.upload) {
+      let upload = (speed.upload.bytes / speed.upload.elapsed / 1024) * 8;
+      upload = Math.round(upload * 100) / 100;
+      await self.setStateChangedAsync('progress.upload', { val: upload, ack: true });
+    }
+    if (speed.ping) {
+      let ping = speed.ping.latency;
+      ping = Math.round(ping);
+      await self.setStateChangedAsync('progress.ping', { val: ping, ack: true });
+    }
+  }
+
+  /**
+   * 
    * @param {*} min 
    */
   async start(min) {
@@ -260,6 +378,8 @@ class Speedtest extends utils.Adapter {
     }
   }
 }
+
+
 
 // @ts-ignore parent is a valid property on module
 if (module.parent) {
