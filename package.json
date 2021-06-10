@@ -16,7 +16,7 @@
     "url": "https://github.com/schmupu/ioBroker.speedtest"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^2.4.0",
+    "@iobroker/adapter-core": "^2.5.0",
     "speedtest-net": "^2.1.1"
   },
   "devDependencies": {
